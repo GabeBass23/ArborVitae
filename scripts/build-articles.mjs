@@ -3,9 +3,10 @@
 // Run this any time a PDF is added to or removed from the articles/ folder
 // (the GitHub Actions workflow runs it automatically on every push).
 
-import { readdirSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from "node:fs";
+import { readdirSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, "..");
@@ -72,13 +73,32 @@ function articlesIndexList(names) {
   return `      <section class="card-grid">\n${cards}\n      </section>\n`;
 }
 
+// Returns when a PDF was first uploaded, as a timestamp in ms: the date of the
+// git commit that added it, falling back to the file's mtime when git history
+// isn't available (e.g. a PDF that hasn't been committed yet).
+function getUploadedAt(pdfFileName) {
+  try {
+    const output = execFileSync(
+      "git",
+      ["log", "--follow", "--diff-filter=A", "--format=%at", "--reverse", "--", join("articles", pdfFileName)],
+      { cwd: root, encoding: "utf8" }
+    ).trim();
+    const firstTimestamp = output.split("\n")[0];
+    if (firstTimestamp) return Number(firstTimestamp) * 1000;
+  } catch {
+    // Not a git repo, or git isn't installed — fall back to mtime below.
+  }
+  return statSync(join(articlesDir, pdfFileName)).mtimeMs;
+}
+
 function main() {
   const entries = readdirSync(articlesDir, { withFileTypes: true });
 
   const pdfNames = entries
     .filter((e) => e.isFile() && e.name.toLowerCase().endsWith(".pdf"))
-    .map((e) => e.name.slice(0, -4).trim())
-    .sort((a, b) => a.localeCompare(b));
+    .map((e) => ({ name: e.name.slice(0, -4).trim(), uploadedAt: getUploadedAt(e.name) }))
+    .sort((a, b) => b.uploadedAt - a.uploadedAt)
+    .map((e) => e.name);
 
   // Remove previously generated article folders that no longer have a matching PDF.
   const existingDirs = entries.filter((e) => e.isDirectory());
