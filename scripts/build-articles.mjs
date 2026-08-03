@@ -16,6 +16,14 @@ const GENERATED_MARKER = ".generated-by-build-articles";
 const LIST_START = "<!-- ARTICLES-LIST:START -->";
 const LIST_END = "<!-- ARTICLES-LIST:END -->";
 
+// Manual escape hatch for upload-date sorting: keyed by current PDF filename.
+// Git can only infer a file's original upload date by following renames, and
+// it can't do that when a rename was done as an unrelated delete + upload
+// (no shared content for git to match), so add an entry here in that case.
+const uploadDateOverrides = JSON.parse(
+  readFileSync(join(__dirname, "upload-date-overrides.json"), "utf8")
+);
+
 function articlePageHtml(name) {
   const pdfFile = `${name}.pdf`;
   return `<!DOCTYPE html>
@@ -77,6 +85,9 @@ function articlesIndexList(names) {
 // git commit that added it, falling back to the file's mtime when git history
 // isn't available (e.g. a PDF that hasn't been committed yet).
 function getUploadedAt(pdfFileName) {
+  if (uploadDateOverrides[pdfFileName]) {
+    return Date.parse(uploadDateOverrides[pdfFileName]);
+  }
   try {
     // Note: --follow and --reverse don't combine reliably (git stops following
     // renames as soon as --reverse is added), so ask for full history newest-first
