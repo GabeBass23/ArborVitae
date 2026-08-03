@@ -78,13 +78,17 @@ function articlesIndexList(names) {
 // isn't available (e.g. a PDF that hasn't been committed yet).
 function getUploadedAt(pdfFileName) {
   try {
+    // Note: --follow and --reverse don't combine reliably (git stops following
+    // renames as soon as --reverse is added), so ask for full history newest-first
+    // and take the oldest entry ourselves instead of using --reverse.
     const output = execFileSync(
       "git",
-      ["log", "--follow", "--diff-filter=A", "--format=%at", "--reverse", "--", join("articles", pdfFileName)],
+      ["log", "--follow", "--format=%at", "--", join("articles", pdfFileName)],
       { cwd: root, encoding: "utf8" }
     ).trim();
-    const firstTimestamp = output.split("\n")[0];
-    if (firstTimestamp) return Number(firstTimestamp) * 1000;
+    const lines = output.split("\n").filter(Boolean);
+    const oldestTimestamp = lines[lines.length - 1];
+    if (oldestTimestamp) return Number(oldestTimestamp) * 1000;
   } catch {
     // Not a git repo, or git isn't installed — fall back to mtime below.
   }
