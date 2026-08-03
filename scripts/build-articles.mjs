@@ -1,5 +1,6 @@
 // Regenerates articles/<Name>/index.html for every PDF in articles/,
 // and rewrites the auto-generated listing block in articles/index.html.
+// Display order comes from article-order.json; see pinnedOrder below.
 // Run this any time a PDF is added to or removed from the articles/ folder
 // (the GitHub Actions workflow runs it automatically on every push).
 
@@ -16,13 +17,10 @@ const GENERATED_MARKER = ".generated-by-build-articles";
 const LIST_START = "<!-- ARTICLES-LIST:START -->";
 const LIST_END = "<!-- ARTICLES-LIST:END -->";
 
-// Manual escape hatch for upload-date sorting: keyed by current PDF filename.
-// Git can only infer a file's original upload date by following renames, and
-// it can't do that when a rename was done as an unrelated delete + upload
-// (no shared content for git to match), so add an entry here in that case.
-const uploadDateOverrides = JSON.parse(
-  readFileSync(join(__dirname, "upload-date-overrides.json"), "utf8")
-);
+// Pins the display order of articles (by name, no ".pdf"), top to bottom.
+// Articles not listed here are new uploads: they're shown above all pinned
+// articles, newest first, until someone adds them to this file.
+const pinnedOrder = JSON.parse(readFileSync(join(__dirname, "article-order.json"), "utf8"));
 
 function articlePageHtml(name) {
   const pdfFile = `${name}.pdf`;
@@ -85,9 +83,6 @@ function articlesIndexList(names) {
 // git commit that added it, falling back to the file's mtime when git history
 // isn't available (e.g. a PDF that hasn't been committed yet).
 function getUploadedAt(pdfFileName) {
-  if (uploadDateOverrides[pdfFileName]) {
-    return Date.parse(uploadDateOverrides[pdfFileName]);
-  }
   try {
     // Note: --follow and --reverse don't combine reliably (git stops following
     // renames as soon as --reverse is added), so ask for full history newest-first
@@ -111,8 +106,16 @@ function main() {
 
   const pdfNames = entries
     .filter((e) => e.isFile() && e.name.toLowerCase().endsWith(".pdf"))
-    .map((e) => ({ name: e.name.slice(0, -4).trim(), uploadedAt: getUploadedAt(e.name) }))
-    .sort((a, b) => b.uploadedAt - a.uploadedAt)
+    .map((e) => {
+      const name = e.name.slice(0, -4).trim();
+      return { name, uploadedAt: getUploadedAt(e.name), pinnedIndex: pinnedOrder.indexOf(name) };
+    })
+    .sort((a, b) => {
+      if (a.pinnedIndex === -1 && b.pinnedIndex === -1) return b.uploadedAt - a.uploadedAt;
+      if (a.pinnedIndex === -1) return -1;
+      if (b.pinnedIndex === -1) return 1;
+      return a.pinnedIndex - b.pinnedIndex;
+    })
     .map((e) => e.name);
 
   // Remove previously generated article folders that no longer have a matching PDF.
