@@ -133,15 +133,22 @@ a.card:hover {
   text-align: center;
 }
 
-.person-card img {
+.person-photo {
   width: 140px;
   height: 140px;
-  object-fit: cover;
+  margin: 0 auto 1rem;
   border-radius: 50%;
-  margin-bottom: 1rem;
+  overflow: hidden;
 }
 
-.person-card h2 {
+.person-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.person-bio h2 {
   margin: 0 0 0.15rem;
   font-size: 1.3rem;
 }
