@@ -118,6 +118,42 @@ a.card:hover {
   transform: translateY(-2px);
 }
 
+.people-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.person-card {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.person-card img {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 1rem;
+}
+
+.person-card h2 {
+  margin: 0 0 0.15rem;
+  font-size: 1.3rem;
+}
+
+.person-role {
+  color: var(--accent);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+}
+
 .pdf-viewer {
   margin-top: 1.5rem;
 }
