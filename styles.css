@@ -40,6 +40,18 @@ body {
   text-transform: uppercase;
 }
 
+.bg-pattern {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url("images/ArborVitaeLogo.png");
+  background-repeat: repeat;
+  background-position: center;
+  background-size: 180px 180px;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
 .brand-logo {
   width: 45px;
   height: 45px;
