@@ -33,6 +33,7 @@ function articlePageHtml(name) {
     <link rel="stylesheet" href="../../styles.css" />
   </head>
   <body>
+    <div class="bg-pattern" aria-hidden="true"></div>
     <header class="site-header">
       <div class="brand-block">
         <a href="../../" class="brand">
