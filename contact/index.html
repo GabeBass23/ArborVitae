@@ -28,10 +28,60 @@
       <section class="hero">
         <p class="section-label">Get involved</p>
         <h1>Contact/Join Us</h1>
-        <p class="intro">
-          Use this space for contact information, submission details, or invitations to join the community.
-        </p>
+
+        <a class="instagram-link" href="https://www.instagram.com/arborvitaeumich/" target="_blank" rel="noreferrer">
+          Follow us on Instagram &rarr;
+        </a>
+
+        <div class="email-form">
+          <p class="section-label">Write an email</p>
+          <h2>Send us a message</h2>
+          <form id="contact-form" class="contact-form">
+            <label for="email-subject">Subject</label>
+            <input type="text" id="email-subject" name="subject" placeholder="What's this about?" required />
+
+            <label for="email-body">Message</label>
+            <textarea id="email-body" name="body" rows="6" placeholder="Write your message..." required></textarea>
+
+            <a id="send-email" class="button" href="https://mail.google.com/mail/?view=cm&fs=1&to=ncherney@umich.edu" target="_blank" rel="noreferrer">Send Email</a>
+          </form>
+        </div>
       </section>
     </main>
+
+    <script>
+      document.getElementById("send-email").addEventListener("click", function (event) {
+        var subjectField = document.getElementById("email-subject");
+        var bodyField = document.getElementById("email-body");
+
+        if (!subjectField.value || !bodyField.value) {
+          event.preventDefault();
+          document.getElementById("contact-form").reportValidity();
+          return;
+        }
+
+        var subject = encodeURIComponent(subjectField.value);
+        var body = encodeURIComponent(bodyField.value);
+        this.href =
+          "https://mail.google.com/mail/?view=cm&fs=1&to=ncherney@umich.edu&su=" + subject + "&body=" + body;
+      });
+    </script>
+
+    <footer class="site-footer">
+      <div class="footer-address">
+        611 E William Street<br />
+        Ann Arbor, MI 48104
+      </div>
+      <div class="footer-links">
+        <a href="https://www.instagram.com/arborvitaeumich/" target="_blank" rel="noreferrer">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+          Instagram
+        </a>
+        <a href="mailto:ncherney@umich.edu">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          ncherney@umich.edu
+        </a>
+      </div>
+    </footer>
   </body>
 </html>
